@@ -157,7 +157,12 @@ sub get_reading
 {
 	my ($data, $field) = @_;
 
-	my $reading = oct( $data->{$field} );
+	# treat the demand value as the hex representation of an unsigned int
+	# eg 0x000001c5 would be consuming 453W from the grid
+	#    0xfffffa36 would be delivering 1482W to the grid
+	# to fix we pack the value as unsigned and then unpack as signed
+
+	my $reading = unpack('l', pack('L', oct( $data->{$field} ) ) );
 
 	if ( my $multiplier = oct( $data->{'Multiplier'} ) )
 	{
